@@ -1,8 +1,5 @@
 # n8n + Upstage AI Agent
 
-![thumbnail](./assets/thumbnail.png)
-
-
 > LLM이 의사결정 흐름을 만들고 n8n이 이를 실행합니다.
 
 ---
