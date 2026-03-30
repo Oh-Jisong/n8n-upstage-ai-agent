@@ -1,0 +1,1189 @@
+{
+  "name": "final day5~",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "693ceea8-a2af-4d45-b496-c5b70cad002a",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -288,
+        48
+      ],
+      "id": "5ccc667d-1787-40cd-ad45-30e2ab0ae61f",
+      "name": "Webhook",
+      "webhookId": "693ceea8-a2af-4d45-b496-c5b70cad002a"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a8844997-83f7-4ef5-8d3c-f68fee3e13ca",
+              "name": "project_title",
+              "value": "={{$json.body.project_title}}",
+              "type": "string"
+            },
+            {
+              "id": "43463fc7-775f-4187-a243-301b0f35c509",
+              "name": "user_goal",
+              "value": "={{$json.body.user_goal}}",
+              "type": "string"
+            },
+            {
+              "id": "fa104aa0-9ac3-4254-9c19-4b6c1b22edc1",
+              "name": "input_type",
+              "value": "={{$json.body.input_type}}",
+              "type": "string"
+            },
+            {
+              "id": "c3206864-90dd-4913-9f16-333d0fa4c222",
+              "name": "input_text",
+              "value": "={{$json.body.input_data.text}}",
+              "type": "string"
+            },
+            {
+              "id": "2176968d-bdeb-47b7-8116-dd2705428a02",
+              "name": "must_use_tools",
+              "value": "={{ $json.body.constraints.must_use_tools }}",
+              "type": "string"
+            },
+            {
+              "id": "ab029b68-1914-4ce5-8f0f-b04c9ad2f92c",
+              "name": "optional_tools",
+              "value": "={{ $json.body.constraints.optional_tools }}",
+              "type": "string"
+            },
+            {
+              "id": "2783f67d-dc4a-45cb-93e5-ca8114d9282a",
+              "name": "max_steps",
+              "value": "={{ $json.body.constraints.max_steps }}",
+              "type": "string"
+            },
+            {
+              "id": "ac8bda8b-a9b9-49c4-a783-75e62f4edda6",
+              "name": "need_human_review",
+              "value": "={{$json.body.constraints.need_human_review}}",
+              "type": "string"
+            },
+            {
+              "id": "7ca4cee0-34e0-46bd-b535-00a79710888e",
+              "name": "project_title",
+              "value": "={{ $json.body?.project_title || $json.project_title || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "7541f622-6141-40e9-8669-96854ef6271f",
+              "name": "user_goal",
+              "value": "={{ $json.body?.user_goal || $json.user_goal || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "be55942b-e572-4831-80f8-68a99d2916ba",
+              "name": "input_text",
+              "value": "={{ $json.body?.input_text || $json.input_text || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "76d472fb-d494-4d9d-b692-e8d8b9c252b2",
+              "name": "max_steps",
+              "value": "={{ $json.body?.max_steps || $json.max_steps || 5 }}",
+              "type": "string"
+            },
+            {
+              "id": "d16563e1-4d5e-4635-ab08-4f19d2bc30b6",
+              "name": "need_human_review",
+              "value": "={{ $json.body?.need_human_review || $json.need_human_review || false }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -64,
+        48
+      ],
+      "id": "13f8e330-6145-4612-a9b3-e8aa3cf2375a",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c97cd8c5-0092-4a60-b042-feb66662bace",
+              "name": "system_prompt",
+              "value": "=You are an AI workflow planner.\n\nYour job is to convert a user's automation request into a strict JSON workflow blueprint for an n8n-based execution engine.\n\nRules:\n1. Return valid JSON only.\n2. Do not wrap the JSON in markdown fences.\n3. The workflow must contain at most {{$json.max_steps}} steps.\n4. The first step must always be a validation step.\n5. Include at least one decision step or fallback policy.\n6. Use at most 2 LLM-related steps.\n7. Use at most 2 integration steps.\n8. If the request is ambiguous, include human_review in fallback_policy.\n9. Prefer simple, executable steps over abstract ideas.\n\n10. The final JSON must follow exactly this schema:\n\n{\n  \"workflow_name\": \"string\",\n  \"workflow_purpose\": \"string\",\n  \"input_schema\": {\n    \"required_fields\": [\"string\"],\n    \"optional_fields\": [\"string\"]\n  },\n  \"steps\": [\n    {\n      \"step_id\": 1,\n      \"name\": \"string\",\n      \"type\": \"validation | llm_task | reasoning | decision | integration\",\n      \"description\": \"string\",\n      \"tool\": \"string or null\",\n      \"input_keys\": [\"string\"],\n      \"output_keys\": [\"string\"],\n      \"failure_action\": \"string or null\",\n      \"condition\": \"string or null\",\n      \"true_action\": \"string or null\",\n      \"false_action\": \"string or null\"\n    }\n  ],\n  \"fallback_policy\": {\n    \"on_missing_info\": \"string\",\n    \"on_low_confidence\": \"string\",\n    \"on_tool_failure\": \"string\"\n  },\n  \"final_output\": {\n    \"format\": \"json\",\n    \"keys\": [\"string\"]\n  },\n  \"human_readable_plan\": \"string\"\n}\n\nIMPORTANT:\nReturn ONLY valid JSON.\nDo NOT include any explanation, text, or markdown.\nThe output must start with { and end with }.\nIf reference document context is provided, use it to make the workflow more grounded, specific, and realistic.",
+              "type": "string"
+            },
+            {
+              "id": "4ebd141d-6fcd-4da7-a758-715380cf7a30",
+              "name": "user_prompt",
+              "value": "=Project title: {{$json.project_title}}\nUser goal: {{$json.user_goal}}\nPrimary input text: {{$json.input_text}}\nReference document exists: {{$json.document_exists}}\nReference document text:\n{{$json.document_text}}\n\nCreate a practical workflow blueprint for an n8n executor.\nUse the reference document when it is available.\nMake the design specific to the scenario.\nKeep the design realistic for a 7-day MVP project.",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1280,
+        160
+      ],
+      "id": "57a103ca-4f59-4184-b279-f25e3218da57",
+      "name": "Build Planner Prompt"
+    },
+    {
+      "parameters": {
+        "model": "solar-pro3",
+        "messages": {
+          "message": [
+            {
+              "role": "system",
+              "content": "={{$json.system_prompt}}"
+            },
+            {
+              "content": "={{$json.user_prompt}}"
+            }
+          ]
+        },
+        "response_format": "json_object",
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "type": "n8n-nodes-upstage.lmChatUpstage",
+      "typeVersion": 1,
+      "position": [
+        1488,
+        160
+      ],
+      "id": "c2d3fbe7-e37e-4ad4-82cb-7cff87a3d47d",
+      "name": "Generate Blueprint with Solar",
+      "credentials": {
+        "upstageApi": {
+          "id": "zJdGbr1h3vMPPDBI",
+          "name": "Upstage account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\n\nconst raw =\n  input.text ||\n  input.output ||\n  input.response ||\n  input.message ||\n  input.content ||\n  input.data?.message ||\n  input.data?.content ||\n  \"\";\n\nlet cleaned = String(raw).trim();\n\ncleaned = cleaned\n  .replace(/^```json\\s*/i, \"\")\n  .replace(/^```\\s*/i, \"\")\n  .replace(/\\s*```$/i, \"\");\n\nconst jsonStart = cleaned.indexOf(\"{\");\nif (jsonStart !== -1) {\n  cleaned = cleaned.slice(jsonStart);\n}\n\nlet parsed = null;\nlet parse_success = false;\nlet parse_error = null;\n\ntry {\n  parsed = JSON.parse(cleaned);\n  parse_success = true;\n} catch (err) {\n  parse_error = err.message;\n}\n\nreturn [\n  {\n    json: {\n      success: parse_success,\n      parse_error,\n      raw_response: raw,\n      cleaned_response: cleaned,\n      workflow_blueprint: parsed,\n      human_readable_plan: parsed?.human_readable_plan || null,\n      planner_meta: {\n        generated_at: new Date().toISOString()\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -304,
+        400
+      ],
+      "id": "9d4f9c5c-0d7f-4ab4-9de9-0c897f84ed00",
+      "name": "Parse Blueprint JSON"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst blueprint = item.workflow_blueprint;\n\nconst source = $('Edit Fields').first().json;\nconst plannerContext = $('Build Planner Context').first().json;\n\nconst normalize = (val) => {\n  try {\n    return JSON.parse(val);\n  } catch {\n    return val;\n  }\n};\n\nreturn [\n  {\n    json: {\n      ...item,\n      workflow_blueprint: {\n        ...blueprint,\n        workflow_name: `Project Title: ${source.project_title}`,\n        workflow_purpose: `User Goal: ${source.user_goal}`\n      },\n      runtime: {\n        must_use_tools: normalize(source.must_use_tools),\n        optional_tools: normalize(source.optional_tools),\n        max_steps: Number(String(source.max_steps).replace(/^=/, \"\")),\n        need_human_review:\n          source.need_human_review === true ||\n          source.need_human_review === \"true\"\n      },\n      execution_input: {\n        text: plannerContext.input_text || source.input_text || \"\",\n        document_exists: plannerContext.document_exists || false,\n        document_text: plannerContext.document_text || \"\"\n      },\n      debug_source: source,\n      debug_planner_context: plannerContext\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -96,
+        400
+      ],
+      "id": "d8ee85a3-f6c9-4533-ad47-2a8cc7b43cf2",
+      "name": "Inject Runtime Values"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\n\nlet blueprint = item.workflow_blueprint;\nlet runtime = item.runtime || {};\nlet executionInput = item.execution_input || {};\n\nconst parseIfString = (value, fieldName) => {\n  if (typeof value === \"string\") {\n    try {\n      return JSON.parse(value);\n    } catch (err) {\n      throw new Error(`${fieldName} is a string but could not be parsed as JSON`);\n    }\n  }\n  return value;\n};\n\nblueprint = parseIfString(blueprint, \"workflow_blueprint\");\nruntime = parseIfString(runtime, \"runtime\");\nexecutionInput = parseIfString(executionInput, \"execution_input\");\n\nif (!blueprint) {\n  throw new Error(\"workflow_blueprint is missing\");\n}\n\nif (!Array.isArray(blueprint.steps)) {\n  throw new Error(\"workflow_blueprint.steps is missing or is not an array\");\n}\n\nreturn [\n  {\n    json: {\n      workflow_name: blueprint.workflow_name,\n      workflow_purpose: blueprint.workflow_purpose,\n      steps: blueprint.steps,\n      runtime,\n      execution_input: executionInput,\n      debug_blueprint: blueprint,\n      debug_execution_input: executionInput,\n      execution_state: {\n        current_step_index: 0,\n        total_steps: blueprint.steps.length,\n        logs: [],\n        results: {},\n        status: \"running\"\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        128,
+        400
+      ],
+      "id": "47dfdcf5-9258-47d4-a385-69bf4598d8d3",
+      "name": "Initialize Execution State"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\n\nconst steps = item.steps || [];\nconst runtime = item.runtime || {};\nconst executionInput = item.execution_input || {};\n\nconst logs = [];\nconst results = {};\nlet status = \"success\";\n\nfor (const step of steps) {\n  const logEntry = {\n    step_id: step.step_id,\n    step_name: step.name,\n    step_type: step.type,\n    status: \"success\",\n    detail: \"\"\n  };\n\n  try {\n    switch (step.type) {\n      case \"validation\": {\n        const rawText = executionInput.text ?? executionInput.inquiry_text ?? \"\";\n        const text = typeof rawText === \"string\" ? rawText.trim() : \"\";\n        const isValid = text.length > 0;\n\n        results.is_valid = isValid;\n        results.validated_text = text;\n\n        logEntry.detail = isValid\n          ? `입력값 검증 성공: ${text}`\n          : \"입력값이 비어 있음\";\n\n        if (!isValid) {\n          logEntry.status = \"failed\";\n          status = \"failed\";\n        }\n        break;\n      }\n\n      case \"llm_task\": {\n        if (step.name.includes(\"분류\")) {\n          results.category = \"refund\";\n          results.confidence = 0.86;\n          logEntry.detail = \"더미 LLM 분류 실행 완료: refund\";\n        } else if (step.name.includes(\"응답\")) {\n          results.response_message =\n            \"안녕하세요. 불편을 드려 죄송합니다. 환불 절차를 도와드리겠습니다.\";\n          logEntry.detail = \"더미 자동 응답 생성 완료\";\n        } else {\n          results.llm_output = \"dummy_llm_result\";\n          logEntry.detail = \"더미 LLM 작업 완료\";\n        }\n        break;\n      }\n\n      case \"reasoning\": {\n        results.summary =\n          \"문의 내용을 분석한 결과 환불 관련 요청으로 판단되며 자동 응답 후보를 생성했습니다.\";\n        logEntry.detail = \"더미 reasoning 실행 완료\";\n        break;\n      }\n\n      case \"decision\": {\n        const confidence = results.confidence ?? 0.5;\n        const needHumanReview =\n          runtime.need_human_review === true || confidence < 0.7;\n\n        results.needs_human_review = needHumanReview;\n        results.decision =\n          needHumanReview ? \"send_to_human_review\" : \"send_auto_response\";\n\n        logEntry.detail = needHumanReview\n          ? \"사람 검토 필요로 판단\"\n          : \"자동 응답 진행으로 판단\";\n        break;\n      }\n\n      case \"integration\": {\n        if (step.tool === \"gmail\") {\n          if (results.decision === \"send_to_human_review\") {\n            results.sent_status = \"dummy_human_review_email_sent\";\n            logEntry.detail = \"담당자 전달 더미 실행 완료\";\n          } else {\n            results.sent_status = \"dummy_auto_reply_sent\";\n            logEntry.detail = \"자동 응답 더미 실행 완료\";\n          }\n        } else if (step.tool === \"google_sheets\") {\n          results.sheet_status = \"dummy_sheet_row_added\";\n          logEntry.detail = \"Google Sheets 더미 저장 완료\";\n        } else {\n          results.integration_status = `dummy_integration_done:${step.tool || \"unknown\"}`;\n          logEntry.detail = `더미 integration 실행 완료: ${step.tool || \"unknown\"}`;\n        }\n        break;\n      }\n\n      default: {\n        logEntry.status = \"skipped\";\n        logEntry.detail = `지원되지 않는 step type: ${step.type}`;\n      }\n    }\n  } catch (err) {\n    logEntry.status = \"error\";\n    logEntry.detail = err.message;\n    status = \"failed\";\n  }\n\n  logs.push(logEntry);\n\n  if (status === \"failed\") {\n    break;\n  }\n}\n\nreturn [\n  {\n    json: {\n      ...item,\n      execution_state: {\n        ...item.execution_state,\n        logs,\n        results,\n        status\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        336,
+        400
+      ],
+      "id": "26c31a65-0b9f-4b95-8b07-b2ea6f5f72d2",
+      "name": "Execute Steps"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\n\nconst workflowName = item.workflow_name || \"\";\n\nlet scenarioType = \"purchase_request\";\nif (workflowName.includes(\"회의\")) {\n  scenarioType = \"meeting_followup\";\n} else if (workflowName.includes(\"문의\")) {\n  scenarioType = \"customer_inquiry\";\n}\n\nreturn [\n  {\n    json: {\n      workflow_name: item.workflow_name,\n      workflow_purpose: item.workflow_purpose,\n      scenario_type: scenarioType,\n      execution_status: item.execution_state.status,\n      total_steps: item.execution_state.total_steps,\n      executed_steps: item.execution_state.logs.length,\n      logs: item.execution_state.logs,\n      results: item.execution_state.results,\n      document_exists: item.execution_input?.document_exists || false,\n      document_preview: (item.execution_input?.document_text || \"\").slice(0, 300),\n      generated_at: new Date().toISOString()\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        400
+      ],
+      "id": "81e72ef2-2785-4310-b29d-348d07e7cda7",
+      "name": "Build Execution Report"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1696,
+        560
+      ],
+      "id": "26dc713c-a5c8-4176-87ef-c118f72355dc",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e17f9da6-4bcc-4065-9c46-cf57cbf979ec",
+              "leftValue": "={{$json.scenario_type}}",
+              "rightValue": "meeting_followup",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        960,
+        560
+      ],
+      "id": "d9f260af-f95d-4039-8bb9-ec42dd28ca57",
+      "name": "Route: Meeting Scenario?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e17f9da6-4bcc-4065-9c46-cf57cbf979ec",
+              "leftValue": "={{$json.scenario_type}}",
+              "rightValue": "customer_inquiry",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1184,
+        704
+      ],
+      "id": "88790478-3baa-4d5e-b3b7-cc6da13d400f",
+      "name": "Route: Inquiry Scenario?"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1rN9lOdynLVXpjfjbSILnDqD1II_z4vp7aPxxVYKic0Y",
+          "mode": "list",
+          "cachedResultName": "n8n-demo-automation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rN9lOdynLVXpjfjbSILnDqD1II_z4vp7aPxxVYKic0Y/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rN9lOdynLVXpjfjbSILnDqD1II_z4vp7aPxxVYKic0Y/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "scenario_type": "={{$json.scenario_type}}",
+            "workflow_name": "={{$json.workflow_name}}",
+            "timestamp": "={{$json.generated_at}}",
+            "execution_status": "={{$json.execution_status}}",
+            "note": "={{$json.natural_message}}",
+            "document_exists": "={{$json.document_exists}}",
+            "document_preview": "={{$json.document_preview}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "scenario_type",
+              "displayName": "scenario_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "workflow_name",
+              "displayName": "workflow_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "execution_status",
+              "displayName": "execution_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "validated_text",
+              "displayName": "validated_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "confidence",
+              "displayName": "confidence",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "decision",
+              "displayName": "decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "note",
+              "displayName": "note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "document_exists",
+              "displayName": "document_exists",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "document_preview",
+              "displayName": "document_preview",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1184,
+        384
+      ],
+      "id": "5381c6de-4e49-4fc0-9530-bff97d65417f",
+      "name": "Save Meeting Result to Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "mr34D5KEMAZDM6N5",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1rN9lOdynLVXpjfjbSILnDqD1II_z4vp7aPxxVYKic0Y",
+          "mode": "list",
+          "cachedResultName": "n8n-demo-automation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rN9lOdynLVXpjfjbSILnDqD1II_z4vp7aPxxVYKic0Y/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rN9lOdynLVXpjfjbSILnDqD1II_z4vp7aPxxVYKic0Y/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{$json.generated_at}}",
+            "scenario_type": "={{$json.generated_at}}",
+            "workflow_name": "={{$json.scenario_type}}",
+            "execution_status": "={{$json.execution_status}}",
+            "validated_text": "={{$json.validated_text}}",
+            "category": "={{$json.results.category}}",
+            "confidence": "={{$json.results.confidence}}",
+            "decision": "={{$json.results.decision}}",
+            "document_exists": "={{$json.document_exists}}",
+            "document_preview": "={{$json.document_preview}}",
+            "note": "={{$json.natural_message}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "scenario_type",
+              "displayName": "scenario_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "workflow_name",
+              "displayName": "workflow_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "execution_status",
+              "displayName": "execution_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "validated_text",
+              "displayName": "validated_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "confidence",
+              "displayName": "confidence",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "decision",
+              "displayName": "decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "note",
+              "displayName": "note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "document_exists",
+              "displayName": "document_exists",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "document_preview",
+              "displayName": "document_preview",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1392,
+        560
+      ],
+      "id": "304f7da6-7cca-4a1d-8fda-37ccb6251885",
+      "name": "Save Inquiry Result to Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "mr34D5KEMAZDM6N5",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1rN9lOdynLVXpjfjbSILnDqD1II_z4vp7aPxxVYKic0Y",
+          "mode": "list",
+          "cachedResultName": "n8n-demo-automation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rN9lOdynLVXpjfjbSILnDqD1II_z4vp7aPxxVYKic0Y/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rN9lOdynLVXpjfjbSILnDqD1II_z4vp7aPxxVYKic0Y/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "scenario_type": "={{$json.scenario_type}}",
+            "timestamp": "={{$json.generated_at}}",
+            "workflow_name": "={{$json.workflow_name}}",
+            "execution_status": "={{$json.execution_status}}",
+            "decision": "={{$json.results.decision}}",
+            "document_exists": "={{$json.document_exists}}",
+            "document_preview": "={{$json.document_preview}}",
+            "note": "={{$json.natural_message}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "scenario_type",
+              "displayName": "scenario_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "workflow_name",
+              "displayName": "workflow_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "execution_status",
+              "displayName": "execution_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "validated_text",
+              "displayName": "validated_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "confidence",
+              "displayName": "confidence",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "decision",
+              "displayName": "decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "note",
+              "displayName": "note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "document_exists",
+              "displayName": "document_exists",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "document_preview",
+              "displayName": "document_preview",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1408,
+        784
+      ],
+      "id": "0ade8d81-8df9-4fc2-8616-696253c9f789",
+      "name": "Save Purchase Result to Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "mr34D5KEMAZDM6N5",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d1e7964e-a0b0-4ea8-972a-17d07f27cebd",
+              "leftValue": "={{$json.has_document}}",
+              "rightValue": "={{ true }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        352,
+        48
+      ],
+      "id": "450a2a5d-12d7-419e-b300-9e68a7fabea5",
+      "name": "Has Document?"
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "pdf_file"
+      },
+      "type": "n8n-nodes-upstage.documentParsingUpstage",
+      "typeVersion": 1,
+      "position": [
+        560,
+        -48
+      ],
+      "id": "4e72a4c7-197e-4218-ba63-6c3b9acd8df0",
+      "name": "Upstage Document Parse",
+      "credentials": {
+        "upstageApi": {
+          "id": "zJdGbr1h3vMPPDBI",
+          "name": "Upstage account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\n\n// 가능한 후보들\nlet raw =\n  item.text ||\n  item.content ||\n  item.markdown ||\n  item.html ||\n  item.result?.text ||\n  item.result?.content ||\n  item.result?.markdown ||\n  item.result?.html ||\n  \"\";\n\n// 객체면 문자열화\nif (typeof raw !== \"string\") {\n  raw = JSON.stringify(raw);\n}\n\n// html/json 형태면 태그나 escape 조금 정리\nlet cleaned = raw\n  .replace(/\\\\n/g, \"\\n\")\n  .replace(/<br\\s*\\/?>/gi, \"\\n\")\n  .replace(/<\\/p>/gi, \"\\n\")\n  .replace(/<[^>]+>/g, \" \")\n  .replace(/\\s+\\n/g, \"\\n\")\n  .replace(/\\n\\s+/g, \"\\n\")\n  .replace(/[ \\t]+/g, \" \")\n  .trim();\n\n// 너무 길면 앞부분만\ncleaned = cleaned.slice(0, 4000);\n\nreturn [\n  {\n    json: {\n      document_exists: true,\n      document_text: cleaned\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        768,
+        -48
+      ],
+      "id": "1c8a3ada-49ab-4de4-af31-a8ecce970aa8",
+      "name": "Extract Document Text"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "defc9194-1f05-4dc4-ab6c-5435b8f3f357",
+              "name": "document_exists",
+              "value": "={{false}}",
+              "type": "string"
+            },
+            {
+              "id": "75a5c306-04d6-46d4-bc98-62f53df4f30f",
+              "name": "document_text",
+              "value": "={{\"\"}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        560,
+        160
+      ],
+      "id": "65367bca-0704-40d1-9408-d64dacab91ee",
+      "name": "Set Empty Document Context"
+    },
+    {
+      "parameters": {
+        "jsCode": "const original = $('Edit Fields').first().json;\nconst doc = $input.first().json;\n\nreturn [\n  {\n    json: {\n      project_title: original.project_title,\n      user_goal: original.user_goal,\n      input_text: original.input_text,\n      max_steps: original.max_steps,\n      need_human_review:\n        original.need_human_review === true ||\n        original.need_human_review === \"true\",\n      document_exists: doc.document_exists || false,\n      document_text: doc.document_text || \"\"\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1056,
+        160
+      ],
+      "id": "26ebf988-4a56-418c-b380-0c4353069c74",
+      "name": "Build Planner Context"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\n\nconst hasDocument = !!item.binary?.pdf_file;\n\nreturn [\n  {\n    json: {\n      ...item.json,\n      has_document: hasDocument\n    },\n    binary: item.binary\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        144,
+        48
+      ],
+      "id": "fc303c18-0cbb-48b6-aed6-06c6945c3135",
+      "name": "Detect Document Presence"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\n\nconst scenarioType = item.scenario_type || \"\";\nconst results = item.results || {};\nconst status = item.execution_status || \"unknown\";\nconst documentExists = item.document_exists || false;\n\n// 🔹 카테고리 한글 변환\nconst categoryMap = {\n  refund: \"환불\",\n  exchange: \"교환\",\n  shipping: \"배송\",\n  inquiry: \"일반 문의\",\n  unknown: \"기타\"\n};\n\n// 🔹 decision 한글 변환\nconst decisionMap = {\n  send_to_human_review: \"담당자 검토 필요\",\n  send_auto_response: \"자동 응답 처리\",\n  auto_approve: \"자동 승인\",\n  reject: \"반려\",\n  pending: \"보류\"\n};\n\nlet naturalMessage = \"\";\nlet shortSummary = \"\";\n\n// ----------------------\n// 🟦 회의 후속조치\n// ----------------------\nif (scenarioType === \"meeting_followup\") {\n  naturalMessage =\n    `회의 후속조치 자동화가 ${status === \"success\" ? \"정상적으로 완료되었습니다\" : \"실행 중 문제가 발생했습니다\"}. ` +\n    `${documentExists ? \"업로드된 회의 문서를 바탕으로 \" : \"\"}` +\n    `주요 논의 내용을 정리하고, 후속 작업 항목을 도출하여 결과를 저장했습니다.`;\n\n  shortSummary = \"회의 후속조치 항목이 자동으로 정리되어 저장되었습니다.\";\n}\n\n// ----------------------\n// 🟨 고객 문의\n// ----------------------\nelse if (scenarioType === \"customer_inquiry\") {\n  const rawCategory = results.category || \"unknown\";\n  const category = categoryMap[rawCategory] || rawCategory;\n\n  const confidence = results.confidence ?? null;\n  const decisionRaw = results.decision || \"unknown\";\n  const decision = decisionMap[decisionRaw] || decisionRaw;\n\n  let decisionText = \"\";\n\n  if (decisionRaw === \"send_to_human_review\") {\n    decisionText = \"추가 확인이 필요하다고 판단되어 담당자에게 전달되었습니다.\";\n  } else if (decisionRaw === \"send_auto_response\") {\n    decisionText = \"자동 응답이 가능한 문의로 판단되어 즉시 처리되었습니다.\";\n  } else {\n    decisionText = `처리 결과는 \"${decision}\" 상태로 결정되었습니다.`;\n  }\n\n  naturalMessage =\n    `고객 문의 자동화가 ${status === \"success\" ? \"정상적으로 완료되었습니다\" : \"실행 중 문제가 발생했습니다\"}. ` +\n    `${documentExists ? \"운영 정책 문서를 참고하여 \" : \"\"}` +\n    `문의 내용은 \"${category}\" 관련 요청으로 분류되었습니다.` +\n    `${confidence !== null ? ` (신뢰도 ${confidence})` : \"\"} ` +\n    `${decisionText}`;\n\n  shortSummary =\n    `문의 유형: ${category} / 처리 결과: ${decision}`;\n}\n\n// ----------------------\n// 🟥 구매 요청\n// ----------------------\nelse if (scenarioType === \"purchase_request\") {\n  const decisionRaw = results.decision || \"unknown\";\n  const decision = decisionMap[decisionRaw] || decisionRaw;\n\n  naturalMessage =\n    `구매 요청 자동화가 ${status === \"success\" ? \"정상적으로 완료되었습니다\" : \"실행 중 문제가 발생했습니다\"}. ` +\n    `${documentExists ? \"구매 정책 문서를 기준으로 \" : \"\"}` +\n    `요청 내용을 분석한 뒤 승인 여부를 판단했습니다. ` +\n    `현재 처리 결과는 \"${decision}\"입니다.`;\n\n  shortSummary =\n    `구매 요청 처리 결과: ${decision}`;\n}\n\n// ----------------------\n// 🔘 기타 (fallback)\n// ----------------------\nelse {\n  naturalMessage =\n    `워크플로우가 실행되었으며 현재 상태는 \"${status}\"입니다.`;\n\n  shortSummary = `상태: ${status}`;\n}\n\nreturn [\n  {\n    json: {\n      ...item,\n      natural_message: naturalMessage,\n      short_summary: shortSummary\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        400
+      ],
+      "id": "d9379474-f3fa-4aa6-a3f4-21f53158c34f",
+      "name": "Generate Natural Language Summary"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Detect Document Presence",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Planner Prompt": {
+      "main": [
+        [
+          {
+            "node": "Generate Blueprint with Solar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Blueprint with Solar": {
+      "main": [
+        [
+          {
+            "node": "Parse Blueprint JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Blueprint JSON": {
+      "main": [
+        [
+          {
+            "node": "Inject Runtime Values",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Inject Runtime Values": {
+      "main": [
+        [
+          {
+            "node": "Initialize Execution State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialize Execution State": {
+      "main": [
+        [
+          {
+            "node": "Execute Steps",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Steps": {
+      "main": [
+        [
+          {
+            "node": "Build Execution Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Execution Report": {
+      "main": [
+        [
+          {
+            "node": "Generate Natural Language Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route: Meeting Scenario?": {
+      "main": [
+        [
+          {
+            "node": "Save Meeting Result to Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Route: Inquiry Scenario?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route: Inquiry Scenario?": {
+      "main": [
+        [
+          {
+            "node": "Save Inquiry Result to Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Save Purchase Result to Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Meeting Result to Sheets": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Inquiry Result to Sheets": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Purchase Result to Sheets": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Document?": {
+      "main": [
+        [
+          {
+            "node": "Upstage Document Parse",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Empty Document Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upstage Document Parse": {
+      "main": [
+        [
+          {
+            "node": "Extract Document Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Empty Document Context": {
+      "main": [
+        [
+          {
+            "node": "Build Planner Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Document Text": {
+      "main": [
+        [
+          {
+            "node": "Build Planner Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Planner Context": {
+      "main": [
+        [
+          {
+            "node": "Build Planner Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detect Document Presence": {
+      "main": [
+        [
+          {
+            "node": "Has Document?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Natural Language Summary": {
+      "main": [
+        [
+          {
+            "node": "Route: Meeting Scenario?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "2f8eb868-c02b-4c64-8ad5-a27af4588466",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a4ecf0c65f730a55b4961cd2de5d31c3b616a963e63556ac8cde256e56291dd3"
+  },
+  "id": "Tg9d2osIUyOxBRM1",
+  "tags": []
+}
